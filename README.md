@@ -1,58 +1,127 @@
 # EEG-Music TRF Analysis Pipeline
 
-This project includes a complete pipeline for preparing musical stimuli, decoding brain responses, and visualizing results from EEG data collected during music listening. It leverages `Eelbrain`, `MNE`, `PrettyMIDI`, and other Python libraries to process both stimulus and neural data.
+This repository implements a pipeline for analyzing EEG responses to musical stimuli using Temporal Response Functions (TRFs). The pipeline includes: preparing musical stimuli from MIDI files, preprocessing and decoding neural responses, and generating statistical visualizations from collected data. The analysis focuses on modeling brain-stimulus relationships to compare brain activity patterns between musicians and non-musicians across multiple EEG frequency bands, providing insights into how musical expertise shapes brain responses to acoustic features.
 
-## Contents
+## Structure
 
-### 1. `midi_to_wav.ipynb` — **Convert MIDI to WAV**
+The analysis pipeline consists of three main components:
+1. **Stimulus Preparation**: Converting MIDI files to WAV format (midi_to_wav.ipynb)
+2. **Neural Decoding**: Computing TRFs to model brain-stimulus relationships (TRF_decoding_pipeline.ipynb)
+3. **Statistical Analysis**: Comparing decoding performance across groups (musicians and non-musicians) and frequency bands (FINAL_RESULTS.ipynb)
 
-This notebook converts symbolic MIDI files into audio waveforms (wav) for use in EEG analysis.
+## Data Requirements
 
-* **Key Function:**
+- **EEG Data**: Bach music listening dataset (`diliBach_4dryad_CND/`)
+  - 20 subjects (10 non-musicians: Sub1-Sub10, 10 musicians: Sub11-Sub20)
+  - 30 trials per subject (10 unique Bach pieces, each presented 3 times)
+  - 64-channel EEG recordings
 
-  * `convert_midi_to_wav()`: Converts MIDI files to WAV, normalizes amplitude, trims silence, and saves output.
-* **Dependencies:** `pretty_midi`, `soundfile`, optional `fluidsynth` with soundfont for higher-quality synthesis.
-* **Output:** 10 `.wav` files (`1.wav`, `2.wav`, ..., `10.wav`) saved to `diliBach_wav_4dryad`.
+- **Audio Stimuli**: MIDI files (`diliBach_midi_4dryad/`)
+  - 10 Bach pieces in MIDI format (`audio1.mid` through `audio10.mid`)
+  - Converted to WAV format for acoustic feature extraction
 
----
+## Dependencies
 
-### 2. `TRF_decoding_pipeline.ipynb` — **EEG-TRF Decoding and Preprocessing**
+**Python 3.8+**
 
-Processes raw EEG recordings, extracts neural responses, and computes correlations with music features (e.g., envelope, onset strength).
+```bash
+# Core scientific computing
+pip install numpy scipy matplotlib
 
-* **Key Steps:**
+# EEG analysis  
+pip install mne eelbrain
 
-  * Loads EEG for one subject (`Sub14`) and performs bandpass filtering (1–4 Hz).
-  * Aligns EEG with stimulus events.
-  * Computes and saves correlation between actual and predicted stimulus features.
+# Audio processing
+pip install pretty_midi soundfile
 
-* **Main Functions:**
+# Data handling (built-in)
+# os, re, pathlib, pickle
+```
 
-  * `load_subject_raw_eeg`
-  * `create_mne_raw_from_loaded`
-  * `create_eelbrain_events`
+## Pipeline Components
 
----
+### 1. MIDI to WAV Conversion (`midi_to_wav.ipynb`)
 
-### 3. `FINAL_RESULTS.ipynb` — **Visualization and Summary**
+Converts symbolic MIDI files into audio waveforms suitable for acoustic feature extraction.
 
-Generates summary plots and statistics across all subjects and trials.
+**Key Features:**
+- High-quality audio synthesis using PrettyMIDI
+- Optional FluidSynth integration for enhanced audio quality
+- Automatic amplitude normalization and silence trimming
+- Batch processing of all stimulus files
 
-* **Purpose:**
+**Output:** 10 WAV files (`1.wav` through `10.wav`) with consistent audio properties
 
-  * Compare predicted vs. true envelopes.
-  * Report best, average, and worst decoding performance.
+### 2. TRF Decoding Pipeline (`TRF_decoding_pipeline.ipynb`)
 
-## Data Description
+The core analysis pipeline that processes EEG data and computes brain-stimulus relationships (for one subject and one band).
 
-* EEG Data Source: Bach music listening dataset (`diliBach_4dryad_CND`)
-* Stimulus: MIDI-converted WAVs from `diliBach_wav_4dryad`
-* TRF Models: Computed using `eelbrain.boosting` and cross-validated.
+**Analysis Steps:**
 
----
+1. **EEG Preprocessing**
+   - Load subject data from MATLAB files
+   - Bandpass filtering (4 frequency bands: delta 1-4Hz, theta 4-8Hz, alpha 8-13Hz, beta 13-30Hz)
+   - Channel localization and montage setup
+
+2. **Stimulus Processing**
+   - Extract acoustic envelope from WAV files
+   - Compute onset strength (derivative of envelope)
+   - Resample features to 100Hz for TRF analysis
+
+3. **TRF Computation**
+   - Forward models: predict EEG from acoustic features (for further research)
+   - Backward models (decoders): predict acoustic features from EEG (for this research)
+
+4. **Decoding Analysis**
+   - Trial-by-trial correlation between predicted and actual acoustic features
+   - Separate analysis for envelope and onset features
+   - Performance metrics stored for statistical testing
+
+**Output:** Pickle files (`sub{X}_{band}`) containing TRF models and trial-wise correlations
+
+### 3. Results Analysis (`FINAL_RESULTS.ipynb`)
+
+Comprehensive statistical analysis and visualization of decoding results across all subjects and conditions.
+
+**Analysis Components:**
+
+1. **Group Comparisons**
+   - Statistical testing (t-tests) comparing musicians vs. non-musicians across frequency bands
+   - Separate analysis for envelope and onset decoding
+
+2. **Backward TRF Visualization**
+   - Average TRF topographies for each group
+   - Temporal response patterns highlighting peak latencies
+   - Butterfly plots showing sensor-level responses
+
+3. **Performance Examples**
+   - Good, average, and bad decoding examples
+   - Trial-specific visualizations comparing predicted vs. actual features
 
 ## How to Run
 
-1. Convert all MIDI to WAV using `midi_to_wav.ipynb`
-2. Run TRF decoding per subject per band in `TRF_decoding_pipeline.ipynb`
-3. Aggregate and visualize final results using `FINAL_RESULTS.ipynb`
+1. Convert all MIDI files to WAV format using `midi_to_wav.ipynb`.
+2. Run TRF decoding per subject per band using `TRF_decoding_pipeline.ipynb`.
+3. Aggregate and visualize final results using `FINAL_RESULTS.ipynb`.
+
+## Key Findings
+
+The study reveals several key findings about musical expertise and neural processing:
+
+1. **Musical Training Effects**: Correlation coefficients were significantly higher for musicians than non-musicians, demonstrating that musical expertise enables more accurate decoding of musical features from EEG.
+
+2. **Theta Band Superiority**: The theta band (4-8 Hz) yielded the best decoding performance overall for both groups, making it the optimal frequency range for musical feature extraction.
+
+3. **Envelope vs Onset Processing**: Envelope decoding generally outperformed onset decoding.
+
+4. **Right-Lateralized Neural Patterns**: Musicians showed stronger filter amplitudes and stronger voltage fields, particularly over right-lateralized channels, aligning with prior findings on hemispheric lateralization for musicians.
+
+## References
+
+The full research "Decoding Melodic Acoustic Features from Neural Data" can be found at:
+
+Paper: https://ccrma.stanford.edu/~iran/papers/Bozilovic_and_Roman_AESAIMLA_2025.pdf
+
+Poster: https://ccrma.stanford.edu/~iran/student_projects/zorka_poster.pdf
+
+All citations for the pipeline methodology and dataset used can be found in the paper's references section.
