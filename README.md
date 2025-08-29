@@ -2,6 +2,7 @@
 
 This repository implements a pipeline for analyzing EEG responses to musical stimuli using Temporal Response Functions (TRFs). The pipeline includes: preparing musical stimuli from MIDI files, preprocessing and decoding neural responses, and generating statistical visualizations from collected data. The analysis focuses on modeling brain-stimulus relationships to compare brain activity patterns between musicians and non-musicians across multiple EEG frequency bands, providing insights into how musical expertise shapes brain responses to acoustic features.
 
+
 ## Structure
 
 The analysis pipeline consists of three main components:
@@ -11,14 +12,18 @@ The analysis pipeline consists of three main components:
 
 ## Data Requirements
 
-- **EEG Data**: Bach music listening dataset (`diliBach_4dryad_CND/`)
+- **EEG Data**: 
+  - Source: `diliBach_4dryad_CND/`
+  - dataset stored as .mat files (`dataSub1.mat` through `dataSub20.mat`)
   - 20 subjects (10 non-musicians: Sub1-Sub10, 10 musicians: Sub11-Sub20)
   - 30 trials per subject (10 unique Bach pieces, each presented 3 times)
   - 64-channel EEG recordings
 
-- **Audio Stimuli**: MIDI files (`diliBach_midi_4dryad/`)
+- **Audio Stimuli**:
+  - Source: `diliBach_midi_4dryad/`
   - 10 Bach pieces in MIDI format (`audio1.mid` through `audio10.mid`)
   - Converted to WAV format for acoustic feature extraction
+
 
 ## Dependencies
 
@@ -37,6 +42,7 @@ pip install pretty_midi soundfile
 # Data handling (built-in)
 # os, re, pathlib, pickle
 ```
+
 
 ## Pipeline Components
 
@@ -83,7 +89,7 @@ The core analysis pipeline that processes EEG data and computes brain-stimulus r
 
 Comprehensive statistical analysis and visualization of decoding results across all subjects and conditions.
 
-**Analysis Components:**
+**Analysis Components and output:**
 
 1. **Group Comparisons**
    - Statistical testing (t-tests) comparing musicians vs. non-musicians across frequency bands
@@ -98,11 +104,13 @@ Comprehensive statistical analysis and visualization of decoding results across 
    - Good, average, and bad decoding examples
    - Trial-specific visualizations comparing predicted vs. actual features
 
+
 ## How to Run
 
 1. Convert all MIDI files to WAV format using `midi_to_wav.ipynb`.
 2. Run TRF decoding per subject per band using `TRF_decoding_pipeline.ipynb`.
 3. Aggregate and visualize final results using `FINAL_RESULTS.ipynb`.
+
 
 ## Key Findings
 
@@ -115,6 +123,7 @@ The study reveals several key findings about musical expertise and neural proces
 3. **Envelope vs Onset Processing**: Envelope decoding generally outperformed onset decoding.
 
 4. **Right-Lateralized Neural Patterns**: Musicians showed stronger filter amplitudes and stronger voltage fields, particularly over right-lateralized channels, aligning with prior findings on hemispheric lateralization for musicians.
+
 
 ## References
 
